@@ -6,13 +6,23 @@ if [ "$EUID" -ne 0 ]; then
         exit 1
 fi
 
-#IS AN ARG (a file) GIVEN?
+#IS AN ARGUMENT (a file) GIVEN?
 if [ "$#" -ne 1 ]; then
         printf "Invalid input\nUsage: %s <FILE>\n" "$(basename "$0")"
         exit 1
 fi
 
 #-------------------------------------------------------------------
+
+while true
+do
+        read -r -p "Do you want to create a SymLink? [Y/N]: " answer
+        case "$answer" in
+                [yY]|[yY][Ee][Ss]) answer=a; break;;
+                [nN]|[nN][oO]) break;;
+                *);;
+        esac
+done
 
 declare -r file="$1"
 filename="$(basename "$file")"
@@ -33,9 +43,9 @@ if [ -d "$path_git" ]; then
 fi
 
 #DOES SYMLINK ALREADY EXIST?
-if [ -L "$symlink" ]; then
-        printf "Symlink already exist\n"
-        x=1
+if [[ "$answer" == "a" && -L "$symlink" ]]; then
+	printf "Symlink already exist\n"
+	x=1
 fi
 
 #EXIT WHEN CHECKS ARE INVALID
@@ -63,11 +73,13 @@ else
 	exit 1
 fi
 
-if ln -fs "$path_git$filename" "$symlink"; then
-        printf "[+] ${GREEN}SymLink created:\t%s${RESET}\n" "$symlink"
-else
-	printf "[-] ${RED}Something went wrong creating SymLink${RESET}"
-	exit 1
+if [ "$answer" == "a" ];then
+	if ln -fs "$path_git$filename" "$symlink"; then
+		printf "[+] ${GREEN}SymLink created:\t%s${RESET}\n" "$symlink"
+	else
+		printf "[-] ${RED}Something went wrong creating SymLink${RESET}"
+		exit 1
+	fi
 fi
 
 if cd "$path_git" || exit 1; output="$(sudo -u "$(logname)" git init | cut -f 6- -d ' ')"; then

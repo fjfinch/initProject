@@ -1,90 +1,74 @@
 #!/bin/bash
 
-#IS SUDO GIVEN?
-if [ "$EUID" -ne 0 ]; then
-        printf "Run it as root\n"
-        exit 1
-fi
+# This script will create a project workspace for you.
+# If you started making a script/file, use it as input for this program.
+# It will:
+# 	1) Create a folder (in a fixes location made for me!) with the name of the script/file
+# 	2) Move the file into that folder
+# 	3) Initialize a Git rep in that folder
+# 	4) Create a SymLink of the script, and be placed in a $PATH folder (placed in /usr/local/bin/). 
+# 		So the script can be run everywhere.
+# ----------------------------------------------------------------------
+
+#COLORED OUTPUT
+declare -r RED='\033[0;31m'
+declare -r GREEN='\033[0;32m'
+declare -r RESET='\033[0m'
 
 #IS AN ARGUMENT (a file) GIVEN?
 if [ "$#" -ne 1 ]; then
-        printf "Invalid input\nUsage: %s <FILE>\n" "$(basename "$0")"
+        printf "${RED}Missing file.${RESET} Usage: %s <FILE>\n" "$(basename "$0")"
         exit 1
 fi
 
-#-------------------------------------------------------------------
+#----------------------------------------------------------------------
 
-while true
-do
-        read -r -p "Do you want to create a SymLink? [Y/N]: " answer
-        case "$answer" in
-                [yY]|[yY][Ee][Ss]) answer=a; break;;
-                [nN]|[nN][oO]) break;;
-                *);;
-        esac
-done
-
-declare -r file="$1"
-filename="$(basename "$file")"
-declare -r filename
-declare -r path_git="/home/finch/Desktop/Git/$filename/"
-declare -r symlink="/usr/local/bin/$filename"
+#VARIABLES
+declare -r FILE="$1"
+FILENAME="$(basename "${FILE}")"
+declare -r FILENAME
+declare -r PATH_GIT="/home/${USER}/Desktop/Git/"
 
 #DOES FILE EXIST?
-if [ ! -f "$file" ]; then
-	printf "File doesn't exist\n"
-	x=1
+if [ ! -f "${FILE}" ]; then
+	printf "${RED}File doesn't exist${RESET}\n"
+	exit 1
 fi
 
 #DOES DIRECTORY ALREADY EXIST?
-if [ -d "$path_git" ]; then
-	printf "Directory already exist\n"
-	x=1
+if [ ! -d "${PATH_GIT}" ]; then
+        printf "${RED}Workspace doesn't exist, but made!${RESET}\n"
+        mkdir "${PATH_GIT}"
+else
+	#DOES DIRECTORY ALREADY EXIST?
+	if [ -d "${PATH_GIT}${FILENAME}/" ]; then
+	        printf "${RED}Project already exist in workspace${RESET}\n"
+	        exit 1
+	fi
 fi
 
-#DOES SYMLINK ALREADY EXIST?
-if [[ "$answer" == "a" && -L "$symlink" ]]; then
-	printf "Symlink already exist\n"
-	x=1
-fi
+#----------------------------------------------------------------------
 
-#EXIT WHEN CHECKS ARE INVALID
-if [ -v x ]; then
-        exit 1
-fi
-
-#-------------------------------------------------------------------
-
-RED='\033[0;91m'
-GREEN='\033[0;32m'
-RESET='\033[0m'
-
-if sudo -u "$(logname)"  mkdir "$path_git"; then
-	printf "[+] ${GREEN}Directory created:\t%s${RESET}\n" "$path_git"
+#CREATE FOLDER
+if mkdir "${PATH_GIT}${FILENAME}/"; then
+	printf "[+] ${GREEN}Directory created:\t%s${RESET}\n" "${PATH_GIT}${FILENAME}/"
 else
 	printf "[-] ${RED}Something went wrong creating directory${RESET}"
 	exit 1
 fi
 
-if mv "$file" "$path_git"; then
-        printf "[+] ${GREEN}File moved:\t\t%s${RESET}\n" "$path_git$filename"
+#MOVE FILE INTO FOLDER
+if mv "${FILE}" "${PATH_GIT}${FILENAME}/"; then
+        printf "[+] ${GREEN}File moved:\t\t%s${RESET}\n" "${PATH_GIT}${FILENAME}/${FILENAME}"
 else
 	printf "[-] ${RED}Something went wrong moving script${RESET}"
 	exit 1
 fi
 
-if [ "$answer" == "a" ];then
-	if ln -fs "$path_git$filename" "$symlink"; then
-		printf "[+] ${GREEN}SymLink created:\t%s${RESET}\n" "$symlink"
-	else
-		printf "[-] ${RED}Something went wrong creating SymLink${RESET}"
-		exit 1
-	fi
-fi
-
-if cd "$path_git" || exit 1; output="$(sudo -u "$(logname)" git init | cut -f 6- -d ' ')"; then
+#INITIALIZE GIT IN FOLDER
+if cd "${PATH_GIT}${FILENAME}/" || exit 1; output="$(git init | cut -f 6- -d ' ')"; then
 	printf "[+] ${GREEN}Git init:\t\t%s${RESET}\n" "$output"
 else
-	printf "[-] ${RED}Something went wring initializing Git${RESET}"
+	printf "[-] ${RED}Something went wrong initializing Git${RESET}"
 	exit 1
 fi

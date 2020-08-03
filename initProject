@@ -23,11 +23,7 @@ fi
 
 #----------------------------------------------------------------------
 
-#VARIABLES
 declare -r FILE="$1"
-FILENAME="$(basename "${FILE}")"
-declare -r FILENAME
-declare -r PATH_GIT="/home/${USER}/Desktop/Git/"
 
 #DOES FILE EXIST?
 if [ ! -f "${FILE}" ]; then
@@ -35,13 +31,20 @@ if [ ! -f "${FILE}" ]; then
 	exit 1
 fi
 
+FILENAME="$(basename "${FILE}")"; declare -r FILENAME
+declare -r PATH_WORKSPACE="/home/${USER}/Desktop/Git/"
+declare -r PATH_PROJECT="${PATH_WORKSPACE}${FILENAME}/"
+
 #DOES DIRECTORY ALREADY EXIST?
-if [ ! -d "${PATH_GIT}" ]; then
-        printf "${RED}Workspace doesn't exist, but made!${RESET}\n"
-        mkdir "${PATH_GIT}"
+if [ ! -d "${PATH_WORKSPACE}" ]; then
+	if mkdir "${PATH_WORKSPACE}"; then
+		printf "[+] ${GREEN}Workspace created:\t%s${RESET}\n" "${PATH_WORKSPACE}"
+	else
+		printf "[-] ${RED}Something went wrong creating workspace${RESET}"
+	fi
 else
 	#DOES DIRECTORY ALREADY EXIST?
-	if [ -d "${PATH_GIT}${FILENAME}/" ]; then
+	if [ -d "${PATH_PROJECT}" ]; then
 	        printf "${RED}Project already exist in workspace${RESET}\n"
 	        exit 1
 	fi
@@ -50,23 +53,23 @@ fi
 #----------------------------------------------------------------------
 
 #CREATE FOLDER
-if mkdir "${PATH_GIT}${FILENAME}/"; then
-	printf "[+] ${GREEN}Directory created:\t%s${RESET}\n" "${PATH_GIT}${FILENAME}/"
+if mkdir "${PATH_PROJECT}"; then
+	printf "[+] ${GREEN}Project created:\t%s${RESET}\n" "${PATH_PROJECT}"
 else
-	printf "[-] ${RED}Something went wrong creating directory${RESET}"
+	printf "[-] ${RED}Something went wrong creating project${RESET}"
 	exit 1
 fi
 
 #MOVE FILE INTO FOLDER
-if mv "${FILE}" "${PATH_GIT}${FILENAME}/"; then
-        printf "[+] ${GREEN}File moved:\t\t%s${RESET}\n" "${PATH_GIT}${FILENAME}/${FILENAME}"
+if mv "${FILE}" "${PATH_PROJECT}"; then
+        printf "[+] ${GREEN}File moved:\t\t%s${RESET}\n" "${PATH_PROJECT}${FILENAME}"
 else
 	printf "[-] ${RED}Something went wrong moving script${RESET}"
 	exit 1
 fi
 
 #INITIALIZE GIT IN FOLDER
-if cd "${PATH_GIT}${FILENAME}/" || exit 1; output="$(git init | cut -f 6- -d ' ')"; then
+if cd "${PATH_PROJECT}" || exit 1; output="$(git init | cut -f 6- -d ' ')"; then
 	printf "[+] ${GREEN}Git init:\t\t%s${RESET}\n" "$output"
 else
 	printf "[-] ${RED}Something went wrong initializing Git${RESET}"

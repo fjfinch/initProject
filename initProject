@@ -23,6 +23,7 @@ fi
 
 #----------------------------------------------------------------------
 
+#ARGUMENT AS VARIABLE
 declare -r FILE="$1"
 
 #DOES FILE EXIST?
@@ -31,19 +32,21 @@ if [ ! -f "${FILE}" ]; then
 	exit 1
 fi
 
+#OTHER VARIABLES
 FILENAME="$(basename "${FILE}")"; declare -r FILENAME
-declare -r PATH_WORKSPACE="/home/${USER}/Desktop/Git/"
+PATH_WORKSPACE="$([ "$EUID" -ne 0 ] && echo "/home/${USER}/Desktop/Git/" || echo "/${USER}/Git/")"; declare -r PATH_WORKSPACE
 declare -r PATH_PROJECT="${PATH_WORKSPACE}${FILENAME}/"
 
-#DOES DIRECTORY ALREADY EXIST?
+#DOES WORKSPACE EXIST?
 if [ ! -d "${PATH_WORKSPACE}" ]; then
 	if mkdir "${PATH_WORKSPACE}"; then
 		printf "[+] ${GREEN}Workspace created:\t%s${RESET}\n" "${PATH_WORKSPACE}"
 	else
 		printf "[-] ${RED}Something went wrong creating workspace${RESET}"
+		exit 1
 	fi
 else
-	#DOES DIRECTORY ALREADY EXIST?
+	#DOES PROJECT ALREADY EXIST?
 	if [ -d "${PATH_PROJECT}" ]; then
 	        printf "${RED}Project already exist in workspace${RESET}\n"
 	        exit 1
@@ -52,7 +55,7 @@ fi
 
 #----------------------------------------------------------------------
 
-#CREATE FOLDER
+#CREATE PROJECT IN WORKSPACE
 if mkdir "${PATH_PROJECT}"; then
 	printf "[+] ${GREEN}Project created:\t%s${RESET}\n" "${PATH_PROJECT}"
 else
@@ -60,7 +63,7 @@ else
 	exit 1
 fi
 
-#MOVE FILE INTO FOLDER
+#MOVE FILE INTO PROJECT FOLDER
 if mv "${FILE}" "${PATH_PROJECT}"; then
         printf "[+] ${GREEN}File moved:\t\t%s${RESET}\n" "${PATH_PROJECT}${FILENAME}"
 else
@@ -68,7 +71,7 @@ else
 	exit 1
 fi
 
-#INITIALIZE GIT IN FOLDER
+#INITIALIZE GIT IN PROJECT FOLDER
 if cd "${PATH_PROJECT}" || exit 1; output="$(git init | cut -f 6- -d ' ')"; then
 	printf "[+] ${GREEN}Git init:\t\t%s${RESET}\n" "$output"
 else

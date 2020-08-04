@@ -3,11 +3,9 @@
 # This script will create a project workspace for you.
 # If you started making a script/file, use it as input for this program.
 # It will:
-# 	1) Create a folder (in a fixes location made for me!) with the name of the script/file
+# 	1) Create a folder (/Desktop/Git/project_name) with the name of the script/file
 # 	2) Move the file into that folder
 # 	3) Initialize a Git rep in that folder
-# 	4) Create a SymLink of the script, and be placed in a $PATH folder (placed in /usr/local/bin/). 
-# 		So the script can be run everywhere.
 # ----------------------------------------------------------------------
 
 #COLORED OUTPUT

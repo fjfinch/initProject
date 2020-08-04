@@ -66,7 +66,7 @@ fi
 if mv "${FILE}" "${PATH_PROJECT}"; then
         printf "[+] ${GREEN}File moved:\t\t%s${RESET}\n" "${PATH_PROJECT}${FILENAME}"
 else
-	printf "[-] ${RED}Something went wrong moving script${RESET}\n"
+	printf "[-] ${RED}Something went wrong moving file${RESET}\n"
 	exit 1
 fi
 
@@ -77,3 +77,5 @@ else
 	printf "[-] ${RED}Something went wrong initializing Git${RESET}\n"
 	exit 1
 fi
+
+printf "For symlink: '%s'\n" "sudo ln -s ${PATH_PROJECT}${FILENAME} /usr/local/bin/${FILENAME}"

@@ -34,15 +34,16 @@ fi
 
 #OTHER VARIABLES
 FILENAME="$(basename "${FILE}")"; declare -r FILENAME
-PATH_WORKSPACE="$([ "$EUID" -ne 0 ] && echo "/home/${USER}/Desktop/Git/" || echo "/${USER}/Git/")"; declare -r PATH_WORKSPACE
+PATH_WORKSPACE="$([ "${EUID}" -ne 0 ] && echo "${HOME}/Desktop/Git/" \
+|| echo "${HOME}/Git/")"; declare -r PATH_WORKSPACE
 declare -r PATH_PROJECT="${PATH_WORKSPACE}${FILENAME}/"
 
 #DOES WORKSPACE EXIST?
 if [ ! -d "${PATH_WORKSPACE}" ]; then
-	if mkdir "${PATH_WORKSPACE}"; then
+	if mkdir -p "${PATH_WORKSPACE}"; then
 		printf "[+] ${GREEN}Workspace created:\t%s${RESET}\n" "${PATH_WORKSPACE}"
 	else
-		printf "[-] ${RED}Something went wrong creating workspace${RESET}"
+		printf "[-] ${RED}Something went wrong creating workspace${RESET}\n"
 		exit 1
 	fi
 else
@@ -59,7 +60,7 @@ fi
 if mkdir "${PATH_PROJECT}"; then
 	printf "[+] ${GREEN}Project created:\t%s${RESET}\n" "${PATH_PROJECT}"
 else
-	printf "[-] ${RED}Something went wrong creating project${RESET}"
+	printf "[-] ${RED}Something went wrong creating project${RESET}\n"
 	exit 1
 fi
 
@@ -67,14 +68,14 @@ fi
 if mv "${FILE}" "${PATH_PROJECT}"; then
         printf "[+] ${GREEN}File moved:\t\t%s${RESET}\n" "${PATH_PROJECT}${FILENAME}"
 else
-	printf "[-] ${RED}Something went wrong moving script${RESET}"
+	printf "[-] ${RED}Something went wrong moving script${RESET}\n"
 	exit 1
 fi
 
 #INITIALIZE GIT IN PROJECT FOLDER
 if cd "${PATH_PROJECT}" || exit 1; output="$(git init | cut -f 6- -d ' ')"; then
-	printf "[+] ${GREEN}Git init:\t\t%s${RESET}\n" "$output"
+	printf "[+] ${GREEN}Git initialized:\t%s${RESET}\n" "$output"
 else
-	printf "[-] ${RED}Something went wrong initializing Git${RESET}"
+	printf "[-] ${RED}Something went wrong initializing Git${RESET}\n"
 	exit 1
 fi

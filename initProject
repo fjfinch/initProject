@@ -71,7 +71,7 @@ else
 fi
 
 #INITIALIZE GIT IN PROJECT FOLDER
-if cd "${PATH_PROJECT}" || exit 1; output="$(git init | cut -f 6- -d ' ')"; then
+if cd "${PATH_PROJECT}" || exit 1; output="$(git init | cut -f 6- -d ' ')"; echo "# ${FILENAME}" > README.md; then
 	printf "[+] ${GREEN}Git initialized:\t%s${RESET}\n" "$output"
 else
 	printf "[-] ${RED}Something went wrong initializing Git${RESET}\n"

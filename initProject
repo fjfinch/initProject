@@ -1,28 +1,20 @@
 #!/bin/bash
 
-# This script will create a project workspace for you.
-# If you started making a script/file, use it as input for this program.
-# It will:
-# 	1) Create a folder (/Desktop/Git/project_name) with the name of the script/file
-# 	2) Move the file into that folder
-# 	3) Initialize a Git rep in that folder
-# ----------------------------------------------------------------------
-
 #COLORED OUTPUT
-declare -r RED='\033[0;31m'
-declare -r GREEN='\033[0;32m'
-declare -r RESET='\033[0m'
+readonly RED='\033[0;31m'
+readonly GREEN='\033[0;32m'
+readonly RESET='\033[0m'
 
-#IS AN ARGUMENT (a file) GIVEN?
-if [ "$#" -ne 1 ]; then
-        printf "${RED}Missing file.${RESET} Usage: %s <FILE>\n" "$(basename "$0")"
+#IS AN ARGUMENT GIVEN?
+if [ "${#}" -ne 1 ]; then
+        printf "${RED}Missing file${RESET}\nUsage: %s <FILE>\n" "$(basename "${0}")"
         exit 1
 fi
 
 #----------------------------------------------------------------------
 
 #ARGUMENT AS VARIABLE
-declare -r FILE="$1"
+readonly FILE="${1}"
 
 #DOES FILE EXIST?
 if [ ! -f "${FILE}" ]; then
@@ -31,10 +23,10 @@ if [ ! -f "${FILE}" ]; then
 fi
 
 #OTHER VARIABLES
-FILENAME="$(basename "${FILE}")"; declare -r FILENAME
-PATH_WORKSPACE="$([ "${EUID}" -ne 0 ] && echo "${HOME}/Desktop/Git/" \
-|| echo "${HOME}/Git/")"; declare -r PATH_WORKSPACE
-declare -r PATH_PROJECT="${PATH_WORKSPACE}${FILENAME}/"
+readonly FILENAME="$(basename "${FILE}")"
+readonly PATH_WORKSPACE="$([ "${EUID}" -ne 0 ] && echo "${HOME}/Desktop/Git/" \
+|| echo "${HOME}/Git/")"
+readonly PATH_PROJECT="${PATH_WORKSPACE}${FILENAME}/"
 
 #DOES WORKSPACE EXIST?
 if [ ! -d "${PATH_WORKSPACE}" ]; then

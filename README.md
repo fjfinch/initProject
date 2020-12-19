@@ -13,4 +13,4 @@ This script is made on / for (Debian) Kali Linux.
 
 Usage: `initProject <FILE>`
 
-where '<FILE>' is the script you want to be stored in the workspace, with a initialized git repository.
+where '\<FILE\>' is the script you want to be stored in the workspace, with a initialized git repository.

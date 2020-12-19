@@ -1,9 +1,9 @@
 # initProject
-* 1 first use) It will create a folder, a workspace (if there isn't one already). The workspace will be called 'Git' (for users: `/$HOME/Desktop/Git/`, and for root: `/root/Git/`)
-* 2) Then it takes the input given, a script, and creates a project folder within the workspace. This folder will take the name of the given script.
-* 3) It will move the given script into the project folder.
-* 4) It will initialize a Git repository for this project.
-* 5) Additionally if you want to create a SymLink of the file placed in $PATH (/usr/local/bin/), it will output the correct command.
+1) (first use) It will create a folder, a workspace (if there isn't one already). The workspace will be called 'Git' (for users: `/$HOME/Desktop/Git/`, and for root: `/root/Git/`)
+2) Then it takes the input given, a script, and creates a project folder within the workspace. This folder will take the name of the given script.
+3) It will move the given script into the project folder.
+4) It will initialize a Git repository for this project.
+5) Additionally if you want to create a SymLink of the file placed in $PATH (/usr/local/bin/), it will output the correct command.
 
 ## Context
 I just wanted to make/start easy projects. All stored in one place, with a Git repository.. That's it.

@@ -8,8 +8,8 @@ readonly RESET='\033[0m'
 #USAGE FUNCTION
 usage () {
 	printf -- "Usage: %s -p <FILE>\n" "$(basename "${0}")"
-	printf -- "  -p:\tFile to use\n"
-	printf -- "  -m:\tName to give (optional)\n"
+	printf -- "  -p:\tFile to use for project\n"
+	printf -- "  -m:\tName to give to project (optional)\n"
 	printf -- "  -h:\tShow help (this screen)\n"
 }
 
@@ -61,7 +61,7 @@ fi
 
 #OTHER VARIABLES
 readonly NAME_FILE="$(basename "${PATH_FILE}")"
-if [ "${EUID}" -ne 0 ]; then readonly PATH_WORKSPACE="${HOME}/Desktop/Git/"; else readonly PATH_WORKSPACE="${HOME}/Git/"; fi
+if [ "${EUID}" -ne 0 ]; then readonly PATH_WORKSPACE="${HOME}/Desktop/git-workspace/"; else readonly PATH_WORKSPACE="${HOME}/git-workspace/"; fi
 if [ -v NAME_PROJECT ]; then readonly PATH_PROJECT="${PATH_WORKSPACE}${NAME_PROJECT}/"; else readonly PATH_PROJECT="${PATH_WORKSPACE}${NAME_FILE}/"; fi
 
 #DOES WORKSPACE EXIST?

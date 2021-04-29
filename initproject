@@ -1,0 +1,109 @@
+#!/bin/bash
+
+#COLORED OUTPUT
+readonly RED='\033[0;31m'
+readonly GREEN='\033[0;32m'
+readonly RESET='\033[0m'
+
+#USAGE FUNCTION
+usage () {
+	printf -- "Usage: %s -p <FILE>\n" "$(basename "${0}")"
+	printf -- "  -p:\tFile to use\n"
+	printf -- "  -m:\tName to give (optional)\n"
+	printf -- "  -h:\tShow help (this screen)\n"
+}
+
+#PROGRAM FLAG SUPPORT
+while getopts ":p:n:h" flag; do
+	case "${flag}" in
+		p)
+			PATH_FILE="${OPTARG}"
+		;;
+		n)
+			NAME_PROJECT="${OPTARG}"
+		;;
+		h)
+			usage
+			exit 0
+		;;
+		\?)
+			printf "${RED}Invalid flag: -%s${RESET}\n" "${OPTARG}"
+			exit 1
+		;;
+		:)
+			printf "${RED}Missing argument for flag: -%s${RESET}\n" "${OPTARG}"
+			exit 1
+		;;
+	esac
+done
+shift "$((OPTIND-1))"
+
+#WEIRD INPUT GIVEN?
+if [ -n "${*}" ]; then
+	printf "${RED}Weird input given${RESET}\n"
+	exit 1
+fi
+
+#IS A FILE GIVEN?
+if [ ! -v PATH_FILE ]; then
+	printf "${RED}No file selected${RESET}\n"
+	usage
+	exit 1
+fi
+
+#DOES FILE EXIST?
+if [ ! -f "${PATH_FILE}" ]; then
+	printf "${RED}File doesn't exist${RESET}\n"
+	exit 1
+fi
+
+#----------------------------------------------------------------------
+
+#OTHER VARIABLES
+readonly NAME_FILE="$(basename "${PATH_FILE}")"
+if [ "${EUID}" -ne 0 ]; then readonly PATH_WORKSPACE="${HOME}/Desktop/Git/"; else readonly PATH_WORKSPACE="${HOME}/Git/"; fi
+if [ -v NAME_PROJECT ]; then readonly PATH_PROJECT="${PATH_WORKSPACE}${NAME_PROJECT}/"; else readonly PATH_PROJECT="${PATH_WORKSPACE}${NAME_FILE}/"; fi
+
+#DOES WORKSPACE EXIST?
+if [ ! -d "${PATH_WORKSPACE}" ]; then
+	if mkdir -p "${PATH_WORKSPACE}"; then
+		printf "[+] ${GREEN}Workspace created:\t%s${RESET}\n" "${PATH_WORKSPACE}"
+	else
+		printf "[-] ${RED}Something went wrong creating workspace${RESET}\n"
+		exit 1
+	fi
+else
+	#DOES PROJECT ALREADY EXIST?
+	if [ -d "${PATH_PROJECT}" ]; then
+	        printf "${RED}Project already exist in workspace${RESET}\n"
+	        exit 1
+	fi
+fi
+
+#----------------------------------------------------------------------
+
+#CREATE PROJECT IN WORKSPACE
+if mkdir "${PATH_PROJECT}"; then
+	printf "[+] ${GREEN}Project created:\t%s${RESET}\n" "${PATH_PROJECT}"
+else
+	printf "[-] ${RED}Something went wrong creating project${RESET}\n"
+	exit 1
+fi
+
+#MOVE FILE INTO PROJECT FOLDER
+if mv "${PATH_FILE}" "${PATH_PROJECT}"; then
+	printf "[+] ${GREEN}File moved:\t\t%s${RESET}\n" "${PATH_PROJECT}${NAME_FILE}"
+else
+	printf "[-] ${RED}Something went wrong moving file${RESET}\n"
+	exit 1
+fi
+
+#INITIALIZE GIT IN PROJECT FOLDER
+if cd "${PATH_PROJECT}" || exit 1; output="$(git init | cut -f 6- -d ' ')"; if [ -v NAME_PROJECT ]; then echo "# ${NAME_PROJECT}" > README.md; else echo "# ${NAME_FILE}" > README.md; fi; then
+	printf "[+] ${GREEN}Git initialized:\t%s${RESET}\n" "$output"
+else
+	printf "[-] ${RED}Something went wrong initializing Git${RESET}\n"
+	exit 1
+fi
+
+printf "For symlink: '%s'\n" "sudo ln -s ${PATH_PROJECT}${NAME_FILE} /usr/local/bin/${NAME_FILE}"
